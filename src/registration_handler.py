@@ -14,19 +14,26 @@ def handler(event, context):
 
     try:
         # get s3 trigger event data
-        bucket_name = event['Records'][0]['bucket']['name']
-        bucket_key = event['records'][0]['bucket']['key']
+        bucket_name = event['Records'][0]['s3']['bucket']['name']
+        object_key = event['records'][0]['s3']['object']['key']
 
-        res = index_user_image(bucket_name, bucket_key)
+        # get face data from rekognition
+        res = index_user_image(bucket_name, object_key)
         print(res)
 
-        # get image_id from dynamodb
-        image_id = res['ResponseMetadata'][0]['Face'] #['Faceid']
+        # expected name: john_doe.jpg
+        firstname, lastname = object_key.split('.')[0].split('_')
+
+        if res['ResponseMetadata']['HTTPStatusCode'] == 200:
+            face_id = res['FaceRecords'][0]['Face']['Faceid']
+
+            # register user in dynamodb
+            register_user(face_id, firstname, lastname)
     except Exception as e:
         print(e)
-        print(f'error processing image {bucket_key} from bucket {bucket_name}')
+        print(f'error processing image {object_key} from bucket {bucket_name}')
 
 
 
-def index_user_image(bucket_name, bucket_key):
+def index_user_image(bucket_name, object_key):
     pass
