@@ -11,7 +11,6 @@ def handler(event, context):
     print(event)
 
     
-
     try:
         # get s3 trigger event data
         bucket_name = event['Records'][0]['s3']['bucket']['name']
@@ -28,7 +27,7 @@ def handler(event, context):
             # return data reference: https://docs.aws.amazon.com/rekognition/latest/APIReference/API_IndexFaces.html
             face_id = res['FaceRecords'][0]['Face']['Faceid']
 
-            # register user in dynamodb
+            # save user data in dynamodb
             register_user(face_id, firstname, lastname)
 
             return res
@@ -48,10 +47,19 @@ def index_user_image(bucket_name, object_key):
                         "Name": object_key,
                     }
             },
-            CollectionId='string' # Todu
+            CollectionId='string' # Todo
         )
     return res
     
-
+# put user into dynamodb
 def register_user(face_id, firstname, lastname):
-    pass
+    # dynamodb API reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html
+    # put_item API reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb/client/put_item.html
+    dynamodb.put_item(
+        TableName=dynamodb_table_name,
+        Item={
+            'face_id': face_id,
+            'firstname': firstname,
+            'lastname': lastname
+        }
+    )
