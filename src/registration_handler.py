@@ -25,10 +25,13 @@ def handler(event, context):
         firstname, lastname = object_key.split('.')[0].split('_')
 
         if res['ResponseMetadata']['HTTPStatusCode'] == 200:
+            # return data reference: https://docs.aws.amazon.com/rekognition/latest/APIReference/API_IndexFaces.html
             face_id = res['FaceRecords'][0]['Face']['Faceid']
 
             # register user in dynamodb
             register_user(face_id, firstname, lastname)
+
+            return res
     except Exception as e:
         print(e)
         print(f'error processing image {object_key} from bucket {bucket_name}')
@@ -36,4 +39,19 @@ def handler(event, context):
 
 
 def index_user_image(bucket_name, object_key):
+    # send to rekognition
+    # Request Syntax: https://docs.aws.amazon.com/rekognition/latest/APIReference/API_IndexFaces.html#API_IndexFaces_Request
+    res = rekognition.index_faces(
+            Image={
+                    "S3Object": { 
+                        "Bucket": bucket_name,
+                        "Name": object_key,
+                    }
+            },
+            CollectionId='string' # Todu
+        )
+    return res
+    
+
+def register_user(face_id, firstname, lastname):
     pass
