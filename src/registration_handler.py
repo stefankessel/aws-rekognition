@@ -5,7 +5,7 @@ s3 = client('s3')
 rekognition = client('rekognition', region_name='eu-central-1')
 dynamodb = resource('dynamodb', region_name= 'eu-central-1')
 dynamodb_table_name = 'users'
-table = dynamodb.Table(dynamodb_table_name)
+# table = dynamodb.Table(dynamodb_table_name)
 
 def handler(event, context):
     print(event)
@@ -47,7 +47,7 @@ def index_user_image(bucket_name, object_key):
                         "Name": object_key,
                     }
             },
-            CollectionId='string' # Todo
+            CollectionId='employees' # Todo
         )
     return res
     
