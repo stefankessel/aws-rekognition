@@ -1,5 +1,4 @@
 from boto3 import client, resource
-import json
 
 # get resources
 s3 = client('s3')
